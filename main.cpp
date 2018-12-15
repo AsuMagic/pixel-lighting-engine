@@ -195,7 +195,7 @@ int main()
 					}
 
 					sprite.setPosition(float(x), float(y));
-					// composite_texture.draw(sprite);
+					composite_texture.draw(sprite);
 				}
 			}
 
