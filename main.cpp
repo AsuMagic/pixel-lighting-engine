@@ -249,17 +249,6 @@ int main()
 			win.draw(composite_sprite, states);
 		}
 
-		// Draw composite texture to window
-		/*{
-			sf::RenderStates states;
-			states.blendMode = sf::BlendMultiply;
-
-			sf::Sprite light_sprite;
-			light_sprite.setTexture(composite_texture.getTexture());
-
-			win.draw(light_sprite, states);
-		}*/
-
 		win.display();
 	}
 }
