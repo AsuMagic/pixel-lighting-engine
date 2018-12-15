@@ -102,21 +102,13 @@ int main()
 		load_texture_indexed(turret_texture, "turret.png", palette_image);
 	}
 
-	sf::Shader indexed_to_rgb_shader;
-	indexed_to_rgb_shader.loadFromFile(
-		"indexed_to_rgb.vert", "indexed_to_rgb.frag");
-	indexed_to_rgb_shader.setUniform("palette_texture", palette_texture);
-	indexed_to_rgb_shader.setUniform(
-		"screen_texture", composite_texture.getTexture());
-
-	sf::Shader light_shift_shader;
-	light_shift_shader.loadFromFile("light_shift.vert", "light_shift.frag");
-	light_shift_shader.setUniform(
+	sf::Shader compose_shader;
+	compose_shader.loadFromFile("compose.vert", "compose.frag");
+	compose_shader.setUniform("palette_texture", palette_texture);
+	compose_shader.setUniform("screen_texture", composite_texture.getTexture());
+	compose_shader.setUniform(
 		"lightmap_texture", light_composite_texture.getTexture());
-	light_shift_shader.setUniform(
-		"screen_texture", composite_texture.getTexture());
-	light_shift_shader.setUniform(
-		"palette_shift_texture", palette_light_texture);
+	compose_shader.setUniform("palette_shift_texture", palette_light_texture);
 
 	while (win.isOpen())
 	{
@@ -203,7 +195,7 @@ int main()
 					}
 
 					sprite.setPosition(float(x), float(y));
-					composite_texture.draw(sprite);
+					// composite_texture.draw(sprite);
 				}
 			}
 
@@ -232,21 +224,10 @@ int main()
 			light_composite_texture.display();
 		}
 
-		// Apply composite texture to palette shifting shader
+		// Post-processing: Apply lighting and convert from indexed to color
 		{
 			sf::RenderStates states;
-			states.shader = &light_shift_shader;
-
-			sf::Sprite light_sprite;
-			light_sprite.setTexture(light_composite_texture.getTexture());
-
-			composite_texture.draw(light_sprite, states);
-		}
-
-		// Convert indexed to RGB in shader
-		{
-			sf::RenderStates states;
-			states.shader = &indexed_to_rgb_shader;
+			states.shader = &compose_shader;
 
 			sf::Sprite composite_sprite;
 			composite_sprite.setTexture(composite_texture.getTexture());
