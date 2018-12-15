@@ -41,7 +41,8 @@ void load_texture_indexed(
 	const sf::String& path,
 	const sf::Image&  palette_image)
 {
-	std::cout << "Loading texture from file " << path.toAnsiString() << '\n';
+	std::cout << "Loading indexed texture from file " << path.toAnsiString()
+			  << '\n';
 
 	sf::Image image;
 	image.loadFromFile(path);
@@ -105,16 +106,17 @@ int main()
 	indexed_to_rgb_shader.loadFromFile(
 		"indexed_to_rgb.vert", "indexed_to_rgb.frag");
 	indexed_to_rgb_shader.setUniform("palette_texture", palette_texture);
-	indexed_to_rgb_shader.setUniform("texture", composite_texture.getTexture());
+	indexed_to_rgb_shader.setUniform(
+		"screen_texture", composite_texture.getTexture());
 
 	sf::Shader light_shift_shader;
 	light_shift_shader.loadFromFile("light_shift.vert", "light_shift.frag");
 	light_shift_shader.setUniform(
 		"lightmap_texture", light_composite_texture.getTexture());
-	light_shift_shader.setUniform("texture", composite_texture.getTexture());
+	light_shift_shader.setUniform(
+		"screen_texture", composite_texture.getTexture());
 	light_shift_shader.setUniform(
 		"palette_shift_texture", palette_light_texture);
-	light_shift_shader.setUniform("resolution", sf::Vector2f(win.getSize()));
 
 	while (win.isOpen())
 	{
@@ -183,32 +185,35 @@ int main()
 		cursor_light_sprite.setScale(light_scale, light_scale);
 
 		win.clear({34, 32, 52});
-		composite_texture.clear({31, 0, 0, 255});
 
-		// Draw tiles
-		for (unsigned y : {256, 256 + 128})
 		{
-			for (unsigned x = 0; x < 800; x += 16)
+			composite_texture.clear({31, 0, 0, 255});
+
+			// Draw tiles
+			for (unsigned y : {256, 256 + 128})
 			{
-				sf::Sprite sprite;
-				sprite.setTexture(tile_texture);
-
-				if (y == 256)
+				for (unsigned x = 0; x < 800; x += 16)
 				{
-					sprite.setScale(1.0f, -1.0f);
+					sf::Sprite sprite;
+					sprite.setTexture(tile_texture);
+
+					if (y == 256)
+					{
+						sprite.setScale(1.0f, -1.0f);
+					}
+
+					sprite.setPosition(float(x), float(y));
+					composite_texture.draw(sprite);
 				}
-
-				sprite.setPosition(float(x), float(y));
-				composite_texture.draw(sprite);
 			}
+
+			sf::Sprite sprite;
+			sprite.setTexture(turret_texture);
+			sprite.setPosition(256, 256 + 128 - turret_texture.getSize().y);
+			composite_texture.draw(sprite);
+
+			composite_texture.display();
 		}
-
-		sf::Sprite sprite;
-		sprite.setTexture(turret_texture);
-		sprite.setPosition(256, 256 + 128 - turret_texture.getSize().y);
-		composite_texture.draw(sprite);
-
-		composite_texture.display();
 
 		// Draw lights to composite texture
 		{

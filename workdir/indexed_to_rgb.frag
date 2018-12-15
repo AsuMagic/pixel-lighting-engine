@@ -1,10 +1,10 @@
-uniform sampler2D texture;
+#version 330 core
+
+uniform sampler2D screen_texture;
 uniform sampler2D palette_texture;
 
 void main()
 {
-	vec2 uv = gl_FragCoord.xy / vec2(2560.0, 1440.0);
-
-	float color = floor(texture2D(texture, uv).r * 256.0);
-    gl_FragColor = texture2D(palette_texture, vec2(color / 32.0, 0.0));
+	float color = texelFetch(screen_texture, ivec2(gl_FragCoord.xy), 0).r * 256.0;
+    gl_FragColor = texelFetch(palette_texture, ivec2(color, 0.0), 0);
 }
